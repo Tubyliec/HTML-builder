@@ -1,4 +1,4 @@
-const fs = require('fs').promises;
+const fs = require('fs/promises');
 const path = require('path');
 
 const pathToSource = path.join(__dirname, 'files');
@@ -13,7 +13,9 @@ async function copyDirectory() {
       pathToSource,
       { withFileTypes: true },
       (err, files) => {
-        if (err) console.log(err.message);
+        if (err) {
+          console.log(err.message);
+        }
         return files;
       },
     );
