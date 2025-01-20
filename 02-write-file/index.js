@@ -8,15 +8,13 @@ const output = fs.createWriteStream(pathToFile, { encoding: 'utf-8' });
 
 stdout.write('How are you?\n');
 
+const lowerExit = 'exit' + os.EOL;
+const upperExit = 'EXIT' + os.EOL;
+
 stdin.on('data', (input) => {
-  if (
-    input.toString() === 'exit' + os.EOL ||
-    input.toString() === 'EXIT' + os.EOL
-  ) {
-    process.exit();
-  } else {
-    output.write(input);
-  }
+  input.toString() === lowerExit || input.toString() === upperExit
+    ? process.exit()
+    : output.write(input);
 });
 
 process.on('SIGINT', () => process.exit());
