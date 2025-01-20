@@ -14,11 +14,10 @@ fs.readdir(pathToFolder, { withFileTypes: true }, (err, files) => {
       const fileExtension = path.extname(pathToFile).replace('.', '');
 
       fs.stat(pathToFile, (err, stats) => {
-        if (err) {
-          console.log(err.message);
-        } else {
-          console.log(`${fileName} - ${fileExtension} - ${stats.size}b`);
-        }
+        const convertToKb = (stats.size / 1024).toFixed(3);
+        err
+          ? console.log(err.message)
+          : console.log(`${fileName} - ${fileExtension} - ${convertToKb}kb`);
       });
     }
   }
