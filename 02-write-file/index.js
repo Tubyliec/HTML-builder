@@ -1,15 +1,15 @@
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const { stdin, stdout } = process;
+const { stdin, stdout } = require('process');
+const { EOL } = require('os');
 
 const pathToFile = path.join(__dirname, 'text.txt');
 const output = fs.createWriteStream(pathToFile, { encoding: 'utf-8' });
 
 stdout.write('How are you?\n');
 
-const lowerExit = 'exit' + os.EOL;
-const upperExit = 'EXIT' + os.EOL;
+const lowerExit = `exit${EOL}`;
+const upperExit = `EXIT${EOL}`;
 
 stdin.on('data', (input) => {
   input.toString() === lowerExit || input.toString() === upperExit

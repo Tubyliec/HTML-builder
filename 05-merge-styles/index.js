@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const fsPromises = require('fs/promises');
+const { stdout } = require('process');
+const { EOL } = require('os');
 
 const PathToOriginFiles = path.join(__dirname, 'styles');
 const PathToMergedFile = path.join(__dirname, 'project-dist', 'bundle.css');
@@ -14,7 +16,7 @@ async function mergeCss() {
       { withFileTypes: true },
       (err, files) => {
         if (err) {
-          console.log(err.message);
+          stdout.write(err.message);
         }
         return files;
       },
@@ -29,11 +31,12 @@ async function mergeCss() {
             encoding: 'utf-8',
           });
           input.on('data', (chunk) => output.write(chunk));
+          stdout.write(`Style "${file.name}" copied successfully!${EOL}`);
         }
       }
     }
   } catch (err) {
-    console.log(err.message);
+    stdout.write(err.message);
   }
 }
 

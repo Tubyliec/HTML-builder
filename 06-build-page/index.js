@@ -1,6 +1,8 @@
 const fs = require('fs');
 const fsPromises = require('fs/promises');
 const path = require('path');
+const { stdout } = require('process');
+const { EOL } = require('os');
 
 const pathToProject = path.join(__dirname, 'project-dist');
 const pathToAssets = path.join(__dirname, 'assets');
@@ -12,37 +14,47 @@ async function createMainFile() {
   const pathToTemplate = path.join(__dirname, 'template.html');
   const pathToMainFile = path.join(pathToProject, 'index.html');
 
-  await fsPromises.copyFile(pathToTemplate, pathToMainFile);
+  try {
+    await fsPromises.copyFile(pathToTemplate, pathToMainFile);
 
-  let mainFile = await fsPromises.readFile(pathToMainFile, {
-    encoding: 'utf-8',
-  });
+    let mainFile = await fsPromises.readFile(pathToMainFile, {
+      encoding: 'utf-8',
+    });
 
-  const pathToComponents = path.join(__dirname, 'components');
-  const components = await fsPromises.readdir(
-    pathToComponents,
-    {
-      withFileTypes: true,
-    },
-    (err, components) => {
-      if (err) {
-        console.log(err.message);
-      }
-      return components;
-    },
-  );
+    const pathToComponents = path.join(__dirname, 'components');
+    const components = await fsPromises.readdir(
+      pathToComponents,
+      {
+        withFileTypes: true,
+      },
+      (err, components) => {
+        if (err) {
+          stdout.write(err.message);
+        }
+        return components;
+      },
+    );
 
-  for (const component of components) {
-    if (component.isFile()) {
-      const pathToComponent = path.join(pathToComponents, component.name);
-      const fileExtension = path.extname(pathToComponent);
-      if (fileExtension === '.html') {
-        const fileContent = await fsPromises.readFile(pathToComponent, 'utf-8');
-        const fileName = component.name.replace(fileExtension, '');
-        mainFile = mainFile.replace(`{{${fileName}}}`, fileContent);
-        await fsPromises.writeFile(pathToMainFile, mainFile);
+    for (const component of components) {
+      if (component.isFile()) {
+        const pathToComponent = path.join(pathToComponents, component.name);
+        const fileExtension = path.extname(pathToComponent);
+        if (fileExtension === '.html') {
+          const fileContent = await fsPromises.readFile(
+            pathToComponent,
+            'utf-8',
+          );
+          const fileName = component.name.replace(fileExtension, '');
+          mainFile = mainFile.replace(`{{${fileName}}}`, fileContent);
+          await fsPromises.writeFile(pathToMainFile, mainFile);
+          stdout.write(
+            `Component "${component.name}" copied successfully!${EOL}`,
+          );
+        }
       }
     }
+  } catch (err) {
+    stdout.write(err.message);
   }
 }
 
@@ -55,7 +67,7 @@ async function copyDirectory(source, destination) {
       { withFileTypes: true },
       (err, files) => {
         if (err) {
-          console.log(err.message);
+          stdout.write(err.message);
         }
         return files;
       },
@@ -66,13 +78,15 @@ async function copyDirectory(source, destination) {
       const pathToCopyFile = path.join(destination, file.name);
       if (file.isDirectory()) {
         copyDirectory(pathToOriginFile, pathToCopyFile);
+        stdout.write(`Directory "${file.name}" copied successfully!${EOL}`);
       }
       if (file.isFile()) {
         fsPromises.copyFile(pathToOriginFile, pathToCopyFile);
+        stdout.write(`File "${file.name}" copied successfully!${EOL}`);
       }
     }
   } catch (err) {
-    console.log(err.message);
+    stdout.write(err.message);
   }
 }
 
@@ -86,7 +100,7 @@ async function mergeCss(source) {
       { withFileTypes: true },
       (err, files) => {
         if (err) {
-          console.log(err.message);
+          stdout.write(err.message);
         }
         return files;
       },
@@ -101,11 +115,12 @@ async function mergeCss(source) {
             encoding: 'utf-8',
           });
           input.on('data', (chunk) => output.write(chunk));
+          stdout.write(`Style "${file.name}" copied successfully!${EOL}`);
         }
       }
     }
   } catch (err) {
-    console.log(err.message);
+    stdout.write(err.message);
   }
 }
 
